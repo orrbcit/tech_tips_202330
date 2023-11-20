@@ -36,15 +36,19 @@ function showMap() {
         // Center the map on the user's location
         map.flyTo({
             center: userLocation
-        }); 
+        });
     });
 
     // Add the MapboxGeocoder search box to the map
     const geocoder = new MapboxGeocoder({
         accessToken: mapboxgl.accessToken,
-        mapboxgl: mapboxgl
+        types: 'country,region,place,postcode,locality,neighborhood,address',
+        localGeocoder: forwardGeocoder, 
+        placeholder: 'Enter search e.g. Lot 7 at BCIT'
     });
     map.addControl(geocoder);
+
+
 
     // Listen for the 'result' event from the geocoder (when a search is made)
     geocoder.on('result', function (e) {
@@ -54,7 +58,9 @@ function showMap() {
 
         // Add a marker to the map at the search location
         searchLocationMarker && searchLocationMarker.remove(); // Remove the previous search marker if it exists
-        searchLocationMarker = new mapboxgl.Marker({color: 'red'})
+        searchLocationMarker = new mapboxgl.Marker({
+                color: 'red'
+            })
             .setLngLat(searchLocation)
             .addTo(map);
 
@@ -72,6 +78,55 @@ function showMap() {
             } // Add some padding so that markers aren't at the edge
         });
     });
+}
+
+// Load custom data to supplement the search results.
+const customData = {
+    'features': [{
+            'type': 'Feature',
+            'properties': {
+                'title': 'Lot 7 at BCIT'
+            },
+            'geometry': {
+                'coordinates': [-122.99934141156427, 49.249070527260315],
+                'type': 'Point'
+            }
+        },
+        {
+            'type': 'Feature',
+            'properties': {
+                'title': 'Lot N at BCIT'
+            },
+            'geometry': {
+                'coordinates': [-123.00264423718266, 49.244465504164474],
+                'type': 'Point'
+            }
+        },
+    ],
+    'type': 'FeatureCollection'
+};
+
+
+function forwardGeocoder(query) {
+    const matchingFeatures = [];
+    for (const feature of customData.features) {
+        // Handle queries with different capitalization
+        // than the source data by calling toLowerCase().
+        if (
+            feature.properties.title
+            .toLowerCase()
+            .includes(query.toLowerCase())
+        ) {
+            // Add an emoji as a prefix for custom
+            // data results using carmen geojson format:
+            // https://github.com/mapbox/carmen/blob/master/carmen-geojson.md
+            feature['place_name'] = `🚗 ${feature.properties.title}`;
+            feature['center'] = feature.geometry.coordinates;
+            feature['place_type'] = ['park'];
+            matchingFeatures.push(feature);
+        }
+    }
+    return matchingFeatures;
 }
 
 //-----------------------------------------------------

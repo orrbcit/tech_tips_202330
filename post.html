@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>My BCIT Project</title>
+    <meta name="comp1800 template" content="My 1800 App">
+
+    <!------------------------>
+    <!-- Required meta tags -->
+    <!------------------------>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!------------------------------------------>
+    <!-- Bootstrap Library CSS JS CDN go here -->
+    <!------------------------------------------>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous">
+        </script>
+
+    <!-------------------------------------------------------->
+    <!-- Firebase 8 Library related CSS, JS, JQuery go here -->
+    <!-------------------------------------------------------->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/ui/4.8.1/firebase-ui-auth.js"></script>
+    <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.8.1/firebase-ui-auth.css" />
+
+    <!-- for geocoder -->
+    <!-- <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no"> -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.14.1/mapbox-gl.js"></script>
+    <script
+        src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+    <link rel="stylesheet"
+        href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css"
+        type="text/css">
+
+    <!-------------------------------------------->
+    <!-- Other libraries and styles of your own -->
+    <!-------------------------------------------->
+    <!-- <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"> -->
+    <!-- <link rel="stylesheet" href="./styles/style.css"> -->
+
+</head>
+
+<body>
+    <!------------------------------>
+    <!-- Your HTML Layout go here -->
+    <!------------------------------>
+
+    <!-- our own navbar goes here -->
+    <nav id="navbarPlaceholder"></nav>
+
+    <!-- the body of your page goes here -->
+    <!-- stuff -->
+    <div class="container">
+        <h1>Make a Post </h1>
+        <form>
+            <div class="form-group">
+                <label>Job Description</label>
+                <textarea id="description" rows="4" cols="50"></textarea>
+            </div>
+            <div class="container py-3">
+                <input type="file" id="mypic-input" accept="image/*" multiple="multiple" />
+                <img id="mypic-goes-here" width=100 height=100 />
+            </div>
+
+            <p>Type or search for your address here.</p>
+            <div id="geocoder"></div>
+            <div id="result"></div>
+    </div>
+    <div class="d-flex mt-5">
+        <button type="button" class="btn btn-info" onclick="savePost()">Post Now</button>
+    </div>
+    </form>
+    </div>
+
+    <!-- our own footer goes here-->
+    <nav id="footerPlaceholder"></nav>
+
+    <!---------------------------------------------->
+    <!-- Your own JavaScript functions go here    -->
+    <!---------------------------------------------->
+    <script src="./scripts/firebaseAPI_TEAM99.js"></script>
+    <script src="./scripts/skeleton.js"></script>
+    <script src="./scripts/post.js"></script>
+
+    <script>
+
+        function placeGeocoder() {
+            // TO MAKE THE MAP APPEAR YOU MUST
+            // ADD YOUR ACCESS TOKEN FROM
+            // https://account.mapbox.com
+            mapboxgl.accessToken = 'pk.eyJ1IjoiYWRhbWNoZW4zIiwiYSI6ImNsMGZyNWRtZzB2angzanBjcHVkNTQ2YncifQ.fTdfEXaQ70WoIFLZ2QaRmQ';
+            const geocoder = new MapboxGeocoder({
+                accessToken: mapboxgl.accessToken,
+                types: 'country,region,place,postcode,locality,neighborhood,address'
+            });
+
+            geocoder.addTo('#geocoder');
+
+            // Get the geocoder results container.
+            const results = document.getElementById('result');
+
+            // Add geocoder result to container.
+            geocoder.on('result', (e) => {
+                var jsondata = JSON.stringify(e.result, null, 2);
+                var data = JSON.parse(jsondata);
+                console.log (data);
+                var place_name = data["place_name"];
+                var place_coord = data["geometry"]["coordinates"];
+                results.innerText = place_name + " " + place_coord;  //show it on dom, debug
+                //You can save this into local storage for now.  
+                //When it is time to Save the Post you can get the data from Local Storage
+                //depending on what you want to save
+                localStorage.setItem("place_name", place_name);
+                localStorage.setItem("place_coord", place_coord);
+            });
+
+            // Clear results container when search is cleared.
+            geocoder.on('clear', () => {
+                results.innerText = '';
+            });
+        }
+        placeGeocoder();
+
+    </script>
+
+
+</body>
+
+</html>
