@@ -15,8 +15,6 @@ function showMap() {
     // Add user controls to map
     map.addControl(new mapboxgl.NavigationControl());
 
-    
-
     //------------------------------------------------
     // Add listener for when the map finishes loading.
     // After loading, we can add map features
@@ -38,14 +36,14 @@ function showMap() {
     });
 }
 
-function moveUserDot(){
-       // Call getGeolocation every 5 seconds
-       console.log("one second " + currentLocation);
-       //currentLocation[0] += 100;
-       //if (currentLocation[0]-userLocation[0]> .01)
-       addUserPinCircle(map);
+function moveUserDot() {
+    // Call getGeolocation every 5 seconds
+    console.log("one second " + currentLocation);
+    //currentLocation[0] += 100;
+    //if (currentLocation[0]-userLocation[0]> .01)
+    addUserPinCircle(map);
 }
-setInterval(moveUserDot, 5000);
+//setInterval(moveUserDot, 5000);
 
 
 function addHikePinsCircle(map) {
@@ -64,13 +62,35 @@ function addHikePinsCircle(map) {
             // img = doc.data().posterurl; // Image
             // url = doc.data().link; // URL
 
+            posts = doc.data().posts //
+            var imgstring = "Pets: ";
+            console.log("number of pets here: " + posts.length);
+            if (posts.length != 0) {
+                posts.forEach(function (p) {
+                    db.collection("posts").doc(p).get().then(doc => {
+                        var pstr = doc.data().image;
+                        imgstring += "<img src='" + pstr + "' width=30 height=30/>"
+                        console.log(imgstring);
+                        localStorage.setItem("imgstr", imgstring);
+                    })
+                })
+            } else {
+                localStorage.setItem("imgstr", imgstring + " none");
+            }
+
+            imgstring = localStorage.getItem("imgstr");
+
             // Push information (properties, geometry) into the features array
             features.push({
                 'type': 'Feature',
                 'properties': {
                     'description': `<strong>${event_name}</strong><p>${preview}</p> 
-                            <br> <a href="/hike.html?id=${doc.id}" target="_blank" 
-                            title="Opens in a new window">Read more</a>`
+                    ${imgstring}
+                    <br>`
+                    // 'description': `<strong>${event_name}</strong><p>${preview}</p> 
+                    //         <br> 
+                    //         <img src="./images/drink1.jpg" width=50 height=50/>
+                    //         title="Opens in a new window">Read more</a>`
                 },
                 'geometry': {
                     'type': 'Point',
@@ -384,8 +404,8 @@ function addUserPinCircle() {
     });
 }
 
-function addCustomLocations(){
-    
+function addCustomLocations() {
+
 }
 
 // Call the function to display the map with the user's location and event pins
